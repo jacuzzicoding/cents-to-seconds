@@ -225,14 +225,14 @@
             background: #2980b9;
         }
 
-        .skip-lunch-btn {
+        .remove-lunch-btn {
             background: #e74c3c;
             color: white;
             padding: 12px 20px;
             font-size: 0.9em;
         }
 
-        .skip-lunch-btn:hover {
+        .remove-lunch-btn:hover {
             background: #c0392b;
         }
 
@@ -321,7 +321,7 @@
             </div>
             <div class="lunch-controls">
                 <button class="resume-btn" id="resumeBtn">Resume Now</button>
-                <button class="skip-lunch-btn" id="skipLunchBtn">Skip Lunch</button>
+                <button class="remove-lunch-btn" id="removeLunchBtn">Remove Lunch</button>
             </div>
         </div>
 
@@ -361,7 +361,7 @@
         const lunchBreakDiv = document.getElementById('lunchBreak');
         const lunchCountdownDisplay = document.getElementById('lunchCountdown');
         const resumeBtn = document.getElementById('resumeBtn');
-        const skipLunchBtn = document.getElementById('skipLunchBtn');
+        const removeLunchBtn = document.getElementById('removeLunchBtn');
         const perSecondDisplay = document.getElementById('perSecond');
         const perMinuteDisplay = document.getElementById('perMinute');
         const perHourDisplay = document.getElementById('perHour');
@@ -442,14 +442,23 @@
             startTimer();
         }
 
-        function skipLunch() {
+        function removeLunch() {
             if (lunchInterval) {
                 clearInterval(lunchInterval);
             }
+
+            // Subtract 30 minutes from elapsed time
+            const LUNCH_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+            elapsedTime = Math.max(0, elapsedTime - LUNCH_DURATION);
+
             isOnLunch = false;
             lunchBreakDiv.classList.remove('active');
             startBtn.disabled = false;
             lunchBtn.disabled = false;
+
+            // Update display immediately to show the reduced time
+            updateDisplay();
+
             startTimer();
         }
 
@@ -513,7 +522,7 @@
         lunchBtn.addEventListener('click', startLunch);
         resetBtn.addEventListener('click', resetTimer);
         resumeBtn.addEventListener('click', resumeFromLunch);
-        skipLunchBtn.addEventListener('click', skipLunch);
+        removeLunchBtn.addEventListener('click', removeLunch);
 
         hourlyWageInput.addEventListener('input', () => {
             updateStats();
