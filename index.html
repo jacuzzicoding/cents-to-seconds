@@ -162,6 +162,80 @@
             background: #7f8c8d;
         }
 
+        .lunch-btn {
+            background: #f39c12;
+            color: white;
+        }
+
+        .lunch-btn:hover {
+            background: #e67e22;
+        }
+
+        .lunch-break {
+            display: none;
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff3cd;
+            border-radius: 10px;
+            border-left: 5px solid #f39c12;
+        }
+
+        .lunch-break.active {
+            display: block;
+        }
+
+        .lunch-status {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .lunch-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+
+        .lunch-countdown {
+            font-size: 2em;
+            font-weight: bold;
+            color: #f39c12;
+            margin: 10px 0;
+        }
+
+        .lunch-message {
+            color: #856404;
+            font-size: 0.9em;
+        }
+
+        .lunch-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .resume-btn {
+            background: #3498db;
+            color: white;
+            padding: 12px 20px;
+            font-size: 0.9em;
+        }
+
+        .resume-btn:hover {
+            background: #2980b9;
+        }
+
+        .skip-lunch-btn {
+            background: #e74c3c;
+            color: white;
+            padding: 12px 20px;
+            font-size: 0.9em;
+        }
+
+        .skip-lunch-btn:hover {
+            background: #c0392b;
+        }
+
         button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -215,7 +289,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>💰 Cents to Seconds</h1>
+        <h1>Cents to Seconds</h1>
         <p class="subtitle">Watch your money grow in real-time!</p>
 
         <div class="input-group">
@@ -235,7 +309,20 @@
         <div class="controls">
             <button class="start-btn" id="startBtn">Start</button>
             <button class="stop-btn" id="stopBtn" disabled>Stop</button>
+            <button class="lunch-btn" id="lunchBtn" disabled>Lunch!</button>
             <button class="reset-btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="lunch-break" id="lunchBreak">
+            <div class="lunch-status">
+                <div class="lunch-title">Lunch Break!</div>
+                <div class="lunch-countdown" id="lunchCountdown">30:00</div>
+                <div class="lunch-message">Timer paused. Enjoy your meal!</div>
+            </div>
+            <div class="lunch-controls">
+                <button class="resume-btn" id="resumeBtn">Resume Now</button>
+                <button class="skip-lunch-btn" id="skipLunchBtn">Skip Lunch</button>
+            </div>
         </div>
 
         <div class="stats">
@@ -259,6 +346,9 @@
         let elapsedTime = 0;
         let timerInterval = null;
         let isRunning = false;
+        let isOnLunch = false;
+        let lunchTimeRemaining = 30 * 60 * 1000; // 30 minutes in milliseconds
+        let lunchInterval = null;
 
         const hourlyWageInput = document.getElementById('hourlyWage');
         const moneyEarnedDisplay = document.getElementById('moneyEarned');
@@ -266,7 +356,12 @@
         const rateDisplay = document.getElementById('rateDisplay');
         const startBtn = document.getElementById('startBtn');
         const stopBtn = document.getElementById('stopBtn');
+        const lunchBtn = document.getElementById('lunchBtn');
         const resetBtn = document.getElementById('resetBtn');
+        const lunchBreakDiv = document.getElementById('lunchBreak');
+        const lunchCountdownDisplay = document.getElementById('lunchCountdown');
+        const resumeBtn = document.getElementById('resumeBtn');
+        const skipLunchBtn = document.getElementById('skipLunchBtn');
         const perSecondDisplay = document.getElementById('perSecond');
         const perMinuteDisplay = document.getElementById('perMinute');
         const perHourDisplay = document.getElementById('perHour');
@@ -307,6 +402,68 @@
             rateDisplay.textContent = formatMoney(hourlyWage) + '/hour';
         }
 
+        function updateLunchCountdown() {
+            const totalSeconds = Math.floor(lunchTimeRemaining / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            lunchCountdownDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function startLunch() {
+            if (!isRunning) return;
+
+            stopTimer();
+            isOnLunch = true;
+            lunchTimeRemaining = 30 * 60 * 1000;
+            updateLunchCountdown();
+            lunchBreakDiv.classList.add('active');
+            lunchBtn.disabled = true;
+            startBtn.disabled = true;
+
+            lunchInterval = setInterval(() => {
+                lunchTimeRemaining -= 100;
+
+                if (lunchTimeRemaining <= 0) {
+                    endLunch();
+                } else {
+                    updateLunchCountdown();
+                }
+            }, 100);
+        }
+
+        function resumeFromLunch() {
+            if (lunchInterval) {
+                clearInterval(lunchInterval);
+            }
+            isOnLunch = false;
+            lunchBreakDiv.classList.remove('active');
+            startBtn.disabled = false;
+            lunchBtn.disabled = false;
+            startTimer();
+        }
+
+        function skipLunch() {
+            if (lunchInterval) {
+                clearInterval(lunchInterval);
+            }
+            isOnLunch = false;
+            lunchBreakDiv.classList.remove('active');
+            startBtn.disabled = false;
+            lunchBtn.disabled = false;
+            startTimer();
+        }
+
+        function endLunch() {
+            if (lunchInterval) {
+                clearInterval(lunchInterval);
+            }
+            isOnLunch = false;
+            lunchBreakDiv.classList.remove('active');
+            startBtn.disabled = false;
+            lunchBtn.disabled = false;
+            startTimer();
+        }
+
         function startTimer() {
             if (isRunning) return;
 
@@ -320,6 +477,7 @@
 
             startBtn.disabled = true;
             stopBtn.disabled = false;
+            lunchBtn.disabled = false;
             hourlyWageInput.disabled = true;
         }
 
@@ -331,21 +489,31 @@
 
             startBtn.disabled = false;
             stopBtn.disabled = true;
+            lunchBtn.disabled = true;
             hourlyWageInput.disabled = false;
         }
 
         function resetTimer() {
             stopTimer();
+            if (lunchInterval) {
+                clearInterval(lunchInterval);
+            }
             elapsedTime = 0;
+            isOnLunch = false;
+            lunchBreakDiv.classList.remove('active');
             updateDisplay();
             startBtn.disabled = false;
             stopBtn.disabled = true;
+            lunchBtn.disabled = true;
             hourlyWageInput.disabled = false;
         }
 
         startBtn.addEventListener('click', startTimer);
         stopBtn.addEventListener('click', stopTimer);
+        lunchBtn.addEventListener('click', startLunch);
         resetBtn.addEventListener('click', resetTimer);
+        resumeBtn.addEventListener('click', resumeFromLunch);
+        skipLunchBtn.addEventListener('click', skipLunch);
 
         hourlyWageInput.addEventListener('input', () => {
             updateStats();
