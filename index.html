@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cents to Seconds - Money Timer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .wage-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .currency-symbol {
+            position: absolute;
+            left: 15px;
+            color: #667eea;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 15px 15px 15px 35px;
+            font-size: 1.2em;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .display {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .money-earned {
+            font-size: 3em;
+            font-weight: bold;
+            color: #2ecc71;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .time-elapsed {
+            font-size: 1.5em;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .rate-display {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1em;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .start-btn {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .start-btn:hover {
+            background: #27ae60;
+        }
+
+        .stop-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .stop-btn:hover {
+            background: #c0392b;
+        }
+
+        .reset-btn {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: #7f8c8d;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .stats {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .stat-label {
+            font-weight: 600;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .money-earned {
+                font-size: 2.5em;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Cents to Seconds</h1>
+        <p class="subtitle">Watch your money grow in real-time!</p>
+
+        <div class="input-group">
+            <label for="hourlyWage">Your Hourly Wage:</label>
+            <div class="wage-input-wrapper">
+                <span class="currency-symbol">$</span>
+                <input type="number" id="hourlyWage" placeholder="25.00" step="0.01" min="0" value="25">
+            </div>
+        </div>
+
+        <div class="display">
+            <div class="money-earned" id="moneyEarned">$0.00</div>
+            <div class="time-elapsed" id="timeElapsed">00:00:00</div>
+            <div class="rate-display" id="rateDisplay">$0.00/hour</div>
+        </div>
+
+        <div class="controls">
+            <button class="start-btn" id="startBtn">Start</button>
+            <button class="stop-btn" id="stopBtn" disabled>Stop</button>
+            <button class="reset-btn" id="resetBtn">Reset</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Per Second:</span>
+                <span class="stat-value" id="perSecond">$0.00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Per Minute:</span>
+                <span class="stat-value" id="perMinute">$0.00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Per Hour:</span>
+                <span class="stat-value" id="perHour">$0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let startTime = null;
+        let elapsedTime = 0;
+        let timerInterval = null;
+        let isRunning = false;
+
+        const hourlyWageInput = document.getElementById('hourlyWage');
+        const moneyEarnedDisplay = document.getElementById('moneyEarned');
+        const timeElapsedDisplay = document.getElementById('timeElapsed');
+        const rateDisplay = document.getElementById('rateDisplay');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const perSecondDisplay = document.getElementById('perSecond');
+        const perMinuteDisplay = document.getElementById('perMinute');
+        const perHourDisplay = document.getElementById('perHour');
+
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function formatMoney(amount) {
+            return `$${amount.toFixed(2)}`;
+        }
+
+        function calculateMoneyEarned() {
+            const hourlyWage = parseFloat(hourlyWageInput.value) || 0;
+            const hours = elapsedTime / (1000 * 60 * 60);
+            return hourlyWage * hours;
+        }
+
+        function updateDisplay() {
+            const moneyEarned = calculateMoneyEarned();
+            moneyEarnedDisplay.textContent = formatMoney(moneyEarned);
+            timeElapsedDisplay.textContent = formatTime(elapsedTime);
+        }
+
+        function updateStats() {
+            const hourlyWage = parseFloat(hourlyWageInput.value) || 0;
+            const perSecond = hourlyWage / 3600;
+            const perMinute = hourlyWage / 60;
+
+            perSecondDisplay.textContent = formatMoney(perSecond);
+            perMinuteDisplay.textContent = formatMoney(perMinute);
+            perHourDisplay.textContent = formatMoney(hourlyWage);
+            rateDisplay.textContent = formatMoney(hourlyWage) + '/hour';
+        }
+
+        function startTimer() {
+            if (isRunning) return;
+
+            startTime = Date.now() - elapsedTime;
+            isRunning = true;
+
+            timerInterval = setInterval(() => {
+                elapsedTime = Date.now() - startTime;
+                updateDisplay();
+            }, 100);
+
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            hourlyWageInput.disabled = true;
+        }
+
+        function stopTimer() {
+            if (!isRunning) return;
+
+            clearInterval(timerInterval);
+            isRunning = false;
+
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            hourlyWageInput.disabled = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            elapsedTime = 0;
+            updateDisplay();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            hourlyWageInput.disabled = false;
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        stopBtn.addEventListener('click', stopTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        hourlyWageInput.addEventListener('input', () => {
+            updateStats();
+            if (!isRunning) {
+                updateDisplay();
+            }
+        });
+
+        // Initialize display
+        updateStats();
+        updateDisplay();
+    </script>
+</body>
+</html>
