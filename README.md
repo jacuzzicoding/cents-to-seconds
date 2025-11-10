@@ -4,12 +4,12 @@ A simple, elegant web application that visualizes your earnings in real-time bas
 
 ## Features
 
-- 💰 **Real-time Money Calculation**: Watch your earnings accumulate as you work
-- ⏱️ **Precise Timer**: Updates every 100ms for smooth animation
-- 📊 **Statistics Panel**: See your earnings broken down per-second, per-minute, and per-hour
-- 📱 **Responsive Design**: Works seamlessly on desktop and mobile devices
-- ⚡ **Zero Dependencies**: Pure HTML5/CSS3/JavaScript—no frameworks or build process needed
-- 🎨 **Beautiful UI**: Purple gradient background with green money display
+- **Real-time Money Calculation**: Watch your earnings accumulate as you work
+- **Precise Timer**: Updates every 100ms for smooth animation
+- **Statistics Panel**: See your earnings broken down per-second, per-minute, and per-hour
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+- **Zero Dependencies**: Pure HTML5/CSS3/JavaScript—no frameworks or build process needed
+- **Beautiful UI**: Purple gradient background with green money display
 
 ## How to Use
 
