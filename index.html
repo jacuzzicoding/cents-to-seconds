@@ -350,6 +350,8 @@
         let lunchTimeRemaining = 30 * 60 * 1000; // 30 minutes in milliseconds
         let lunchInterval = null;
 
+        const STORAGE_KEY = 'centsToSecondsState';
+
         const hourlyWageInput = document.getElementById('hourlyWage');
         const moneyEarnedDisplay = document.getElementById('moneyEarned');
         const timeElapsedDisplay = document.getElementById('timeElapsed');
@@ -365,6 +367,90 @@
         const perSecondDisplay = document.getElementById('perSecond');
         const perMinuteDisplay = document.getElementById('perMinute');
         const perHourDisplay = document.getElementById('perHour');
+
+        // Save state to localStorage
+        function saveState() {
+            const state = {
+                hourlyWage: hourlyWageInput.value,
+                elapsedTime: elapsedTime,
+                isRunning: isRunning,
+                isOnLunch: isOnLunch,
+                lunchTimeRemaining: lunchTimeRemaining,
+                lastSaveTimestamp: Date.now()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        // Load state from localStorage
+        function loadState() {
+            try {
+                const savedState = localStorage.getItem(STORAGE_KEY);
+                if (!savedState) return;
+
+                const state = JSON.parse(savedState);
+
+                // Restore hourly wage
+                if (state.hourlyWage) {
+                    hourlyWageInput.value = state.hourlyWage;
+                }
+
+                // Restore elapsed time
+                elapsedTime = state.elapsedTime || 0;
+
+                // If timer was running, calculate time passed since last save
+                if (state.isRunning && state.lastSaveTimestamp) {
+                    const timePassed = Date.now() - state.lastSaveTimestamp;
+                    elapsedTime += timePassed;
+                    // Auto-resume the timer
+                    startTimer();
+                }
+
+                // Restore lunch break state
+                if (state.isOnLunch) {
+                    isOnLunch = true;
+                    lunchTimeRemaining = state.lunchTimeRemaining || 30 * 60 * 1000;
+
+                    // Calculate time passed during lunch
+                    if (state.lastSaveTimestamp) {
+                        const timePassed = Date.now() - state.lastSaveTimestamp;
+                        lunchTimeRemaining = Math.max(0, lunchTimeRemaining - timePassed);
+                    }
+
+                    // Resume lunch countdown if time remaining
+                    if (lunchTimeRemaining > 0) {
+                        lunchBreakDiv.classList.add('active');
+                        lunchBtn.disabled = true;
+                        startBtn.disabled = true;
+                        updateLunchCountdown();
+
+                        lunchInterval = setInterval(() => {
+                            lunchTimeRemaining -= 100;
+                            if (lunchTimeRemaining <= 0) {
+                                endLunch();
+                            } else {
+                                updateLunchCountdown();
+                            }
+                        }, 100);
+                    } else {
+                        // Lunch break expired while page was closed
+                        endLunch();
+                    }
+                }
+
+                // Update displays
+                updateStats();
+                updateDisplay();
+            } catch (e) {
+                console.error('Failed to load saved state:', e);
+            }
+        }
+
+        // Auto-save state periodically when timer is running
+        setInterval(() => {
+            if (isRunning || isOnLunch) {
+                saveState();
+            }
+        }, 1000); // Save every second when active
 
         function formatTime(milliseconds) {
             const totalSeconds = Math.floor(milliseconds / 1000);
@@ -429,6 +515,8 @@
                     updateLunchCountdown();
                 }
             }, 100);
+
+            saveState();
         }
 
         function resumeFromLunch() {
@@ -440,6 +528,8 @@
             startBtn.disabled = false;
             lunchBtn.disabled = false;
             startTimer();
+
+            saveState();
         }
 
         function removeLunch() {
@@ -460,6 +550,8 @@
             updateDisplay();
 
             startTimer();
+
+            saveState();
         }
 
         function endLunch() {
@@ -471,6 +563,8 @@
             startBtn.disabled = false;
             lunchBtn.disabled = false;
             startTimer();
+
+            saveState();
         }
 
         function startTimer() {
@@ -488,6 +582,8 @@
             stopBtn.disabled = false;
             lunchBtn.disabled = false;
             hourlyWageInput.disabled = true;
+
+            saveState();
         }
 
         function stopTimer() {
@@ -500,6 +596,8 @@
             stopBtn.disabled = true;
             lunchBtn.disabled = true;
             hourlyWageInput.disabled = false;
+
+            saveState();
         }
 
         function resetTimer() {
@@ -515,6 +613,9 @@
             stopBtn.disabled = true;
             lunchBtn.disabled = true;
             hourlyWageInput.disabled = false;
+
+            // Clear saved state on reset
+            localStorage.removeItem(STORAGE_KEY);
         }
 
         startBtn.addEventListener('click', startTimer);
@@ -529,9 +630,11 @@
             if (!isRunning) {
                 updateDisplay();
             }
+            saveState();
         });
 
-        // Initialize display
+        // Initialize: Load saved state first, then update display
+        loadState();
         updateStats();
         updateDisplay();
     </script>
